@@ -42,21 +42,18 @@ bool getProcessCmdXp(unsigned long pid, QString& cmdLine) {
 
  lpAddr = (LPBYTE)GetCommandLine;
 Win7:
-	if(lpAddr[dwPos] == 0xeb && lpAddr[dwPos + 1] == 0x05)
-	{
+	if(lpAddr[dwPos] == 0xeb && lpAddr[dwPos + 1] == 0x05) {
 		dwPos += 2;
 		dwPos += 5;
 Win8:
-		if(lpAddr[dwPos] == 0xff && lpAddr[dwPos + 1] == 0x25)
-		{
+		if(lpAddr[dwPos] == 0xff && lpAddr[dwPos + 1] == 0x25) {
 			dwPos += 2;
 			lpAddr = *(LPBYTE*)(lpAddr + dwPos);
  
 			dwPos = 0;
 			lpAddr = *(LPBYTE*)lpAddr;
 WinXp:
-			if(lpAddr[dwPos] == 0xa1)
-			{
+			if(lpAddr[dwPos] == 0xa1) {
 				dwPos += 1;
 				lpAddr = *(LPBYTE*)(lpAddr + dwPos);
 				bRet = ReadProcessMemory(hProcess, lpAddr, &lpAddr, sizeof(LPBYTE),
@@ -71,14 +68,10 @@ WinXp:
             }
 				}
 			}
-		}
-		else
-		{			
+		} else {			
 			goto WinXp;
 		}
-	}
-	else
-	{
+	} else {
 		goto Win8;
 	}
  
@@ -86,4 +79,42 @@ WinXp:
 }
 
 
+
+#include "winternl.h"
+typedef NTSTATUS  (WINAPI *NtQueryInformationProcessFake)(HANDLE, DWORD, PVOID, ULONG, PULONG);
+ 
+NtQueryInformationProcessFake ntQ = NULL;
+QString getProcessCmd(unsigned long pid) {
+  QString cmdStr;
+  HANDLE hproc = OpenProcess(PROCESS_ALL_ACCESS, FALSE, pid );
+	if (INVALID_HANDLE_VALUE != hproc){
+		HANDLE hnewdup = NULL;
+		PEB peb;
+		RTL_USER_PROCESS_PARAMETERS upps;
+		WCHAR buffer[MAX_PATH] = {NULL};
+		HMODULE hm = LoadLibrary(_T("Ntdll.dll"));
+		ntQ = (NtQueryInformationProcessFake)GetProcAddress(hm, "NtQueryInformationProcess");
+		if ( DuplicateHandle(GetCurrentProcess(), hproc, GetCurrentProcess(), &hnewdup, 0, FALSE, DUPLICATE_SAME_ACCESS) ) {
+			PROCESS_BASIC_INFORMATION pbi;
+			NTSTATUS isok = ntQ(hnewdup, 0/*ProcessBasicInformation*/, (PVOID)&pbi, sizeof(PROCESS_BASIC_INFORMATION), 0);        
+			if (BCRYPT_SUCCESS(isok)) {
+				if ( ReadProcessMemory(hnewdup, pbi.PebBaseAddress, &peb, sizeof(PEB), 0) )
+					if ( ReadProcessMemory(hnewdup, peb.ProcessParameters, &upps, sizeof(RTL_USER_PROCESS_PARAMETERS), 0) ) {
+						WCHAR *buffer = new WCHAR[upps.CommandLine.Length + 1];
+						ZeroMemory(buffer, (upps.CommandLine.Length + 1) * sizeof(WCHAR));
+						ReadProcessMemory(hnewdup, upps.CommandLine.Buffer, buffer, upps.CommandLine.Length, 0);
+						cmdStr = QString::fromWCharArray(buffer);
+            delete buffer;
+					}
+			}
+			CloseHandle(hnewdup);
+		}
+ 
+		CloseHandle(hproc);
+	}
+  return cmdStr;
+ }
+ 
+
+ 
  
