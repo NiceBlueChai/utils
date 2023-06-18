@@ -1,3 +1,6 @@
+
+local lsp = require("plugins.lsp")
+
 return {
     {
     "folke/which-key.nvim",
@@ -16,10 +19,31 @@ return {
 	"nvim-neo-tree/neo-tree.nvim",
 	branch = "v2.x",
 	keys ={
-	    { "<leader>ft", "<cmd>NeoTree toggle<cr>", desc = "NeoTree" },
+	    { "<leader>ft", "<cmd>NeoTreeShowToggle<cr>", desc = "NeoTree" },
+	    { "<F3>", "<cmd>NeoTreeFocusToggle<cr>", desc = "NeoTree" },
 	},
 	config = function() 
-	    require("neo-tree").setup()
+	    require("neo-tree").setup({
+		close_if_last_window = true,
+		enable_git_status = true,
+		default_component_configs = {
+		    git_status = {
+		    symbols = {
+			-- Change type
+			added     = "", -- or "✚", but this is redundant info if you use git_status_colors on the name
+			modified  = "", -- or "", but this is redundant info if you use git_status_colors on the name
+			deleted   = "×",-- this can only be used in the git_status source
+			renamed   = "",-- this can only be used in the git_status source
+			-- Status type
+			untracked = "",
+			ignored   = "",
+			unstaged  = "",
+			staged    = "",
+			conflict  = "*",
+			},
+		    },
+		},
+	    })
 	end,
 	dependencies = {
 	    "nvim-lua/plenary.nvim",
@@ -27,4 +51,5 @@ return {
 	    "MunifTanjim/nui.nvim",
 	},
     },
+    lsp
 }

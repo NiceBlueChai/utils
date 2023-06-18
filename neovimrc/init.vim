@@ -2,28 +2,22 @@ set runtimepath^=~/.vim runtimepath+=~/.vim/after
 let &packpath = &runtimepath
 source ~/.vimrc
 
+
 " lua require('basic')
 " lua require('plugins')
 
 " lua require("nvim-lsp-installer").setup{}
 
 lua << EOF
--- ~/.local/share/nvim/lzay/lazy.nvim
-local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
-if not vim.loop.fs_stat(lazypath) then
-  vim.fn.system({
-    "git",
-    "clone",
-    "--filter=blob:none",
-    "https://github.com/folke/lazy.nvim.git",
-    "--branch=stable", -- latest stable release
-    lazypath,
-  })
-end
-vim.opt.rtp:prepend(lazypath)
+    require("core.options")
+    require("plugins-setup")
 
-require("lazy").setup("plugins")
+--[[    local capabilities = require('cmp_nvim_lsp').default_capabilities()
 
+require("lspconfig").clangd.setup {
+  capabilities = capabilities,
+}
+--]]
 EOF
 
 echo ">^.^<"
