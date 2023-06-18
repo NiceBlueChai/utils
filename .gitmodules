@@ -1,0 +1,6 @@
+[submodule "neovimrc/lazy.nvim"]
+	path = neovimrc/lazy.nvim
+	url = https://github.com/folke/lazy.nvim.git
+	branch = stable
+	filter = "blob:none"
+
