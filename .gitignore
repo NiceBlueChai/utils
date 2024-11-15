@@ -1,0 +1,12 @@
+.vs/
+.vscode/
+build/
+.cache/
+out/
+
+# cxx
+*.o
+*.d
+*.so
+*.a
+CMakeUserPresets.json
