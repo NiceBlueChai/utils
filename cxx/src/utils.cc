@@ -4,6 +4,7 @@
 #include <sstream>
 
 #ifdef _WIN32
+#include "utils/utils-win.h"
 #include <Windows.h>
 #else
 #include <errno.h>
@@ -58,8 +59,13 @@ std::pair<std::string, std::string> split1(const std::string &str,
 
 bool is_running(const std::string &uid) {
 #ifdef _WIN32
-  auto path = std::string("Global/") + uid;
-  auto mutex = CreateMutexA(NULL, FALSE, path.c_str());
+  auto _path = std::string("Global/") + uid;
+#if defined(UNICODE) || defined(_UNICODE)
+  auto path = local_codepage_to_utf16(_path);
+#else
+  auto &path = _path;
+#endif
+  auto mutex = CreateMutex(NULL, FALSE, path.c_str());
   if (mutex != NULL) {
     if (GetLastError() == ERROR_ALREADY_EXISTS) {
       CloseHandle(mutex);

@@ -1,14 +1,46 @@
-#include <windows.h>
+#include <Windows.h>
+#include <TChar.h>
+#include "utils/utils.h"
+#include "utils/common.h"
+
+NBC_NAMESPACE_BEGIN
+
+namespace utils {
+
+
+std::wstring local_codepage_to_utf16(const std::string& input) {
+    size_t       need = MultiByteToWideChar(CP_ACP, 0, input.c_str(), input.size(), 0, 0);
+    wchar_t     *wstr = static_cast<wchar_t *>(malloc(need + sizeof(wchar_t)));
+    size_t       used = MultiByteToWideChar(CP_ACP, 0, input.c_str(), input.size(), wstr, need);
+    std::wstring result(wstr, used);
+    free(wstr);
+    return result;
+}
+
+std::string utf16_to_local_codepage(wchar_t * data, size_t len) {
+    BOOL ignore;
+
+    size_t      need = WideCharToMultiByte(CP_ACP, 0, data, len, 0, 0, "?", &ignore);
+    char       *cstr = static_cast<char *>(malloc(need + 1));
+    size_t      used = WideCharToMultiByte(CP_ACP, 0, data, len, cstr, need, "?", &ignore);
+    std::string result(cstr, used);
+    free(cstr);
+    return result;
+}
 
 // Qt's QProcess function cannot invoke programs that require administrator
 // privileges, so we need windows api funtion to invoke the program that require
 // adminstrator privileges.
+#if defined(UNICODE) || defined(_UNICODE)
+DWORD runShellAsAdministrator(LPCWSTR cmd, LPCWSTR arg, int n_show) {
+#else
 DWORD runShellAsAdministrator(LPCSTR cmd, LPCSTR arg, int n_show) {
+#endif
   SHELLEXECUTEINFO shell_exec_info = {0};
   shell_exec_info.cbSize = sizeof(SHELLEXECUTEINFO);
   shell_exec_info.fMask = SEE_MASK_NOCLOSEPROCESS;
   shell_exec_info.hwnd = NULL;
-  shell_exec_info.lpVerb = "runas";
+  shell_exec_info.lpVerb = _TEXT("runas");
   shell_exec_info.lpFile = cmd;
   shell_exec_info.lpParameters = arg;
   shell_exec_info.lpDirectory = NULL;
@@ -121,3 +153,7 @@ QString getProcessCmd(unsigned long pid) {
   return cmdStr;
 }
 #endif
+
+}
+
+NBC_NAMESPACE_END

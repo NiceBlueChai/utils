@@ -1,3 +1,5 @@
-
 add_executable(app ${CMAKE_CURRENT_LIST_DIR}/app.cc)
 target_link_libraries(app utils )
+if(MSVC)
+  target_compile_options(app PRIVATE /source-charset:utf-8 /execution-charset:gb2312)
+endif()

@@ -21,6 +21,14 @@ NBC_EXPORT std::pair<std::string,std::string> split1(const std::string& str, cha
 
 NBC_EXPORT bool is_running(const std::string& uid);
 
+
+#ifdef __linux
+std::string utf16_to_local_codepage(char16_t *data, size_t len);
+std::string local_codepage_to_utf16(const std::string& input);
+#else
+std::wstring local_codepage_to_utf16(const std::string& input);
+std::string  utf16_to_local_codepage(wchar_t *data, size_t len);
+#endif
 }
 
 NBC_NAMESPACE_END
