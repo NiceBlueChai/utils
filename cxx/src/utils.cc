@@ -59,7 +59,7 @@ std::pair<std::string, std::string> split1(const std::string &str,
 
 bool is_running(const std::string &uid) {
 #ifdef _WIN32
-  auto _path = std::string("Global/") + uid;
+  auto _path = std::string("Global\\") + uid;
 #if defined(UNICODE) || defined(_UNICODE)
   auto path = local_codepage_to_utf16(_path);
 #else
