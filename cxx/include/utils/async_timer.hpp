@@ -6,29 +6,31 @@
 
 namespace nbc {
     using namespace boost;
-    class async_timer
+    class async_timer final
     {
     public:
-        class timer_wrapper : public std::enable_shared_from_this<timer_wrapper> {
+        class timer_wrapper final : public std::enable_shared_from_this<timer_wrapper> {
         public:
-
+            friend class async_timer;
             timer_wrapper(asio::io_context& io, std::size_t msecond, bool repeat = false) : timer_(io, std::chrono::milliseconds(msecond))
                 , msecond_(msecond), repeat_(repeat) {
             }
             ~timer_wrapper() = default;
+
             void work_fn() {
                 auto self(shared_from_this());
                 timer_.expires_after(std::chrono::milliseconds(msecond_));
                 timer_.async_wait([self](const std::error_code& ec) {
+                    if (ec) {
+                        return;
+                    }
                     self->task_wrapper_();
-                    });
-                timer_.async_wait([self](const std::error_code& ec) {
-                    self->check_is_repeat();
+                    if (self->repeat_ && self->is_running_) {
+                        self->work_fn();
+                    }
                     });
             }
-            void check_is_repeat() {
-                work_fn();
-            }
+        private:
             asio::steady_timer timer_;
             std::function<void()> task_wrapper_;
             std::atomic_bool is_running_{ true };
@@ -60,9 +62,8 @@ namespace nbc {
 
         template<typename T>
         void cancel(T&& timer_ptr) {
-            std::error_code ec;
             timer_ptr->is_running_.store(false, std::memory_order_release);
-            timer_ptr->timer_.cancel(ec);
+            timer_ptr->timer_.cancel();
         }
 
         void stop() {
