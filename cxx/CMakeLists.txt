@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.16 FATAL_ERROR)
 project(utils VERSION 1 LANGUAGES CXX)
 
+option(ENABLE_UNIT_TESTS "Enable unit tests" ON)
+message(STATUS "Enable unit tests: ${ENABLE_UNIT_TESTS}")
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -31,6 +33,12 @@ if(MSVC)
 endif()
 
 find_package(GTest REQUIRED)
+
 add_subdirectory(src)
-add_subdirectory(tests)
 add_subdirectory(examples)
+if(ENABLE_UNIT_TESTS)
+  enable_testing()
+  # allow to report to a cdash dashboard
+  include(CTest)
+  add_subdirectory(tests)
+endif(ENABLE_UNIT_TESTS)

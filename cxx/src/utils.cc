@@ -65,7 +65,11 @@ bool is_running(const std::string &uid) {
 #else
   auto &path = _path;
 #endif
-  auto mutex = CreateMutex(NULL, FALSE, path.c_str());
+  SECURITY_ATTRIBUTES sa;
+  sa.nLength = sizeof(SECURITY_ATTRIBUTES);
+  sa.lpSecurityDescriptor = NULL;
+  sa.bInheritHandle = FALSE;
+  auto mutex = CreateMutex(&sa, FALSE, path.c_str());
   if (mutex != NULL) {
     if (GetLastError() == ERROR_ALREADY_EXISTS) {
       CloseHandle(mutex);

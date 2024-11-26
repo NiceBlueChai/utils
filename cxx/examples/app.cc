@@ -1,5 +1,4 @@
 #include "utils/utils.h"
-
 #include <chrono>
 #include <iostream>
 #include <thread>
