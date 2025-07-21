@@ -40,19 +40,19 @@ unset_proxy() {
 
 test_settings() {
   echo "Try to connect to Google..."
-  resp=$(curl -I -s --connect-time 5 -m 5 -w "%{http_code}" -o /dev/null/ www.google.com)
-  if [ ${resp} = 200 ]; then
+  resp=$(curl -I -s --connect-timeout 5 -m 5 -w "%{http_code}" -o /dev/null www.google.com)
+  if [ "${resp}" = 200 ]; then
     echo "Proxy setup succeeded!"
   else
     echo "Proxy setup failed!"
   fi
 }
 
-if [ "$1" == "set" ]; then
+if [ "$1" = "set" ]; then
   set_proxy
-elif [ "$1" == "unset" ]; then
+elif [ "$1" = "unset" ]; then
   unset_proxy
-elif [ "$1" == "test" ]; then
+elif [ "$1" = "test" ]; then
   test_settings
 else
   echo "Unsupport arguments."
