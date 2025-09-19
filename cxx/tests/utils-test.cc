@@ -2,6 +2,8 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <gtest/gtest.h>
+
 #ifdef __linux
 #include <fcntl.h>
 #include <unistd.h>

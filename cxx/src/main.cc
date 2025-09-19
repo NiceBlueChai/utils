@@ -5,7 +5,7 @@
 int main(int argc, char* argv[])
 {
 	{
-		zhf::async_timer timer;
+		nbc::async_timer timer;
 		timer.post<1000>([] {
 			std::cout << "hoho" << std::endl;
 		});
