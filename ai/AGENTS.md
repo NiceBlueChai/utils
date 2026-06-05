@@ -1,7 +1,7 @@
 # Codex 全局指导
 
 ## 编码规范
-- 文件统一使用 UTF-8 编码，无 BOM（如果原来是utf-8 with bom则继续使用原来的）；Windows上行尾 CRLF；缩进 4 个空格；单行长度不超过 120 字符。
+- 文件统一使用 UTF-8 编码，无 BOM（如果原来是utf-8 with bom则继续使用原来的）；Windows上行尾 CRLF；缩进 4 个空格。
 
 
 ## 代码质量
